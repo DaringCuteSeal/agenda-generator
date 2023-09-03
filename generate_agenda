@@ -358,8 +358,6 @@ then
 	fi
 
 
-	echo "$(date '+%-m%d%Y')"
-	echo "$timestamp"
 	if [[ $(date '+%-m%d%Y') -gt $timestamp ]]
 	then
 		if [ -t 0 ]
