@@ -1,0 +1,490 @@
+#!/bin/bash
+
+export LC_ALL="id_ID.UTF-8"
+
+STYLE_BOLD="$(tput bold)"
+STYLE_RESET="\e[0;m"
+
+LAST_PATH="$HOME/Documents/School/Stuff/agenda/last"
+
+setdate=${DATE_OVERRIDE:-tomorrow}
+tanggal="`date -d "$setdate" '+%d %B %Y'`"
+hari="`date -d "$setdate" '+%A'`"
+
+j_pulang_tmp="14:35"
+
+mapels() {
+	echo "📚 *Mapel*"
+
+	if [[ -n "$mapels_custom" ]]
+	then
+		for (( i = 0; i < ${#mapels_custom[@]}; i++ ))
+		do
+			echo "$(($i+1))) ${kode[${mapels_custom[$i]}]}"
+		done
+
+	else
+		eval mapels="${mapel[$hari]}"
+
+		for (( i = 0; i < ${#mapels[@]}; i++ ))
+		do
+			echo "$(($i+1))) ${kode[${mapels[$i]}]}"
+		done
+
+	fi
+
+}
+
+sep(){
+	echo
+	case "$(date +%b -d 'tomorrow')" in
+		Jan)
+			echo "🪅🎉🪅"
+			;;
+		Feb)
+			echo "💐💌💗"
+			;;
+		Apr)
+			echo "🐰🐰🐰"
+			;;
+		Agu)
+			echo "🇮🇩🇮🇩🇮🇩"
+			;;
+		Des)
+			echo "❄️☃️❄️"
+			;;
+		*)
+			echo "---"
+			;;
+	esac
+	echo
+}
+
+save_data(){
+	# Save data
+	mv "$LAST_PATH" "${LAST_PATH%/*}/last.bak"
+	cat > "$LAST_PATH"<< EOF
+timestamp="$(date '+%-m%d%Y')"
+last_renungan_1=${siswa_renungan_1:-$last_renungan_1}
+last_renungan_2=${siswa_renungan_2:-$last_renungan_2}
+last_doa_pulang=${siswa_doa_pulang:-$last_doa_pulang}
+senin_last_piket=(${senin_last_piket[@]})
+selasa_last_piket=(${selasa_last_piket[@]})
+rabu_last_piket=(${rabu_last_piket[@]})
+kamis_last_piket=(${kamis_last_piket[@]})
+jumat_last_piket=(${jumat_last_piket[@]})
+
+EOF
+}
+
+source "$HOME/Documents/School/siswa_db/siswa_9d.sh"
+source "$LAST_PATH" || echo "[i] Gagal menyumberkan informasi terakhir!" > /dev/stderr
+
+case "$hari" in
+	Senin)
+		;;
+	Selasa)
+		eskur="(bagi yang eskur pulang pk. 16:15)"
+		;;
+	Jumat)
+		eskur="(bagi yang eskur pulang pk. 16:15)"
+		;;
+	Rabu)
+		j_pulang_pre="16:15"
+		j_pulang_tmp="16:15"
+		eskur="(ada eskur Pramuka)"
+		;;
+esac
+
+case "$hari" in
+	Sabtu|Minggu)
+		hari="Senin"
+		tanggal="`date -d 'monday' '+%d %B %Y'`"
+		;;
+esac
+
+case "$hari" in
+	Senin)
+		baju="*seragam putih kotak lengkap*, membawa *jas lab*"
+		;;
+	Selasa)
+		baju="*seragam putih kotak lengkap*"
+		;;
+	Rabu)
+		[[ $MAPELS_ONLY -ne 1 ]] && read -p "→ Sport time? [y/n] > " tmp
+		if [[ "$tmp" == "n" ]]
+		then
+			sport_time=n
+			baju="*seragam Pramuka lengkap* dengan *kacu, ikat pinggang*; membawa topi Pramuka 🤠"
+		else
+			baju="*baju olah raga atau kaos bebas* (ada sport time), *membawa seragam Pramuka lengkap* dengan *kacu* dan *ikat pinggang* dan *topi Pramuka* 🤠"
+		fi
+	#	eskur="(ada eskur pramuka)"
+		;;
+	Kamis)
+		baju="*baju olahraga*, membawa *seragam putih kotak*."
+		;;
+	Jumat)
+		baju="*baju batik* dengan *bawahan biru*"
+		;;
+
+		# yo wes PJJ lagi
+		#baju="*baju olahraga*"
+esac
+
+
+declare -A kode=(
+[1]="PPkn"
+[2]="Agama"
+[3]="Agama"
+[4]="PPKn"
+[5]="PPKn"
+[6]="B. Indonesia"
+[7]="B. Indonesia"
+[8]="B. Indonesia"
+[9]="B. Indonesia"
+[10]="Inggris"
+[11]="Inggris"
+[12]="Inggris"
+[13]="Matematika"
+[14]="Matematika"
+[15]="Matematika"
+[16]="Matematika"
+[17]="Fisika"
+[18]="Fisika"
+[19]="Fisika"
+
+[21]="Biologi"
+[22]="Biologi"
+[23]="Biologi"
+[24]="IPS"
+[25]="IPS"
+[26]="IPS"
+[27]="PJOK"
+[28]="PJOK"
+[39]="B. Sunda"
+[40]="Mandarin"
+[41]="Mandarin"
+[47]="Native"
+[LAB]="Laboratorium"
+[PRA]="Prakarya"
+[SB]="Seni budaya"
+[NAT]="Native"
+[LABF]="Lab Fisika"
+[LABB]="Lab Biologi"
+)
+
+declare -A mapel=(
+
+# Has fake arrays
+
+["Senin"]='(10 14 NAT LABF LABB 25 8)'
+["Selasa"]='(14 18 PRA 28 10)'
+["Rabu"]='(SB 4 25 2 40)'
+["Kamis"]='(28 14 SB 2 39 25 8)'
+["Jumat"]='(18 4 10 14 22 8)'
+)
+
+if [[ "$MAPELS_ONLY" -eq 1 ]]
+then
+	mapels
+	exit 0
+fi
+
+
+if [[ ! "$1" == "preview" ]]
+then
+	read -p "→ Jam masuk? [06:45] > " j_masuk
+	read -p "→ Jam pulang? [$j_pulang_tmp] > " j_pulang
+	if [[ -z "$j_pulang" ]] && [[ -n "$j_pulang_pre" ]]
+	then
+		j_pulang="$j_pulang_pre"
+	fi
+	read -p "→ Seragam? [${baju//\*}] > " baju_tmp
+
+	read -e -p "→ Mapel custom? " -a mapels_custom
+
+	read -p "→ PR [y/n] > " tmp
+	if [[ "$tmp" == "y" ]]
+	then
+		n=1
+		echo "$n)" > /dev/stderr
+		read -e -p "Mapel: " input_pr_mapel
+		read -e -p "Tugas: " input_pr_tugas
+		read -e -p "Tenggat: " input_pr_tenggat
+
+		[[ -n "$input_pr_mapel" ]] && pr_mapel=("$input_pr_mapel")
+		[[ -n "$input_pr_tugas" ]] && pr=("$input_pr_tugas")
+		[[ -n "$input_pr_tenggat" ]] && pr_tenggat=("$input_pr_tenggat") || pr_tenggat=("null")
+
+		(( n++ ))
+
+		while [[ -n "$input_pr_mapel" ]] || [[ -n "$input_pr_tugas" ]]
+		do
+			echo > /dev/stderr
+
+			echo "$n)" > /dev/stderr
+			read -e -p "Mapel: " input_pr_mapel
+			[[ -z "$input_pr_mapel" ]] && break
+			read -e -p "Tugas: " input_pr_tugas
+			read -e -p "Tenggat: " input_pr_tenggat
+
+
+			[[ -n "$input_pr_mapel" ]] && pr_mapel+=("$input_pr_mapel")
+			[[ -n "$input_pr_tugas" ]] && pr+=("$input_pr_tugas")
+			[[ -n "$input_pr_tenggat" ]] && pr_tenggat+=("$input_pr_tenggat") || pr_tenggat+=("null")
+
+			(( n++ ))
+		done
+	fi
+
+
+	
+	read -p "→ Penilaian [y/n] > " tmp
+	if [[ "$tmp" == "y" ]]
+	then
+		n=1
+		echo "$n)" > /dev/stderr
+		read -e -p "Penilaian: " input_penilaian
+		read -e -p "Materi: " input_penilaian_materi
+
+		[[ -n "$input_penilaian" ]] && penilaian=("$input_penilaian")
+		[[ -n "$input_penilaian_materi" ]] && penilaian_materi=("$input_penilaian_materi") || penilaian_materi=("null")
+
+		(( n++ ))
+
+		while [[ -n "$input_penilaian" ]]
+		do
+			echo > /dev/stderr
+
+			echo "$n)" > /dev/stderr
+			read -e -p "Penilaian: " input_penilaian
+			[[ -z "$input_penilaian" ]] && break
+			read -e -p "Materi: " input_penilaian_materi
+
+			[[ -n "$input_penilaian" ]] && penilaian+=("$input_penilaian")
+			[[ -n "$input_penilaian_materi" ]] && penilaian_materi+=("$input_penilaian_materi") || penilaian_materi+=("null")
+
+			(( n++ ))
+		done
+	fi
+
+	read -p "→ Catatan? [y/n] > " tmp
+	if [[ "$tmp" == "y" ]]
+	then
+		n=1
+		read -e -p "$n) " input_catatan
+		[[ -n "$input_catatan" ]] && catatan=("$input_catatan")
+		(( n++ ))
+
+		while [[ -n "$input_catatan" ]]
+		do
+			read -e -p "$n) " input_catatan
+			[[ -n "$input_catatan" ]] && catatan+=("$input_catatan")
+			(( n++ ))
+		done
+	fi
+
+	if [[ -t 0 ]] # only print these when stdin is open
+	then
+		echo -e " \nRenungan Pagi" > /dev/stderr
+		echo "Terakhir: ${siswa_9d[$last_renungan_1]} (no. $last_renungan_1), ${siswa_9d[$last_renungan_2]} (no. $last_renungan_2)" > /dev/stderr
+		echo -e "${STYLE_BOLD}8 siswa dalam range renungan:${STYLE_RESET}" > /dev/stderr
+
+		for i in $(seq $((last_renungan_1 - 3)) $((last_renungan_2 + 3)))
+		do
+			if [[ $i -eq $last_renungan_1 ]] || [[ $i == "$last_renungan_2" ]]
+			then
+				echo -e "\e[0;33m ${STYLE_BOLD}${i}) ${siswa_9d[$i]}${STYLE_RESET}" > /dev/stderr
+			else
+				echo " $((i % ${#siswa_9d[@]}))) ${siswa_9d[$((i % ${#siswa_9d[@]}))]}" > /dev/stderr
+			fi
+		done
+	fi
+
+	tmp="boo"
+	until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
+	do
+		read -p "→ Siswa 1: [$(((last_renungan_1 + 2) % ${#siswa_9d[@]}))]> " tmp
+	done
+	if [[ -z "$tmp" ]] 
+	then
+		siswa_renungan_1="$(((last_renungan_1 + 2) % ${#siswa_9d[@]}))"
+	else
+		siswa_renungan_1="$tmp"
+	fi
+
+	tmp=boo
+	until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
+	do
+		read -p "→ Siswa 2: [$(((last_renungan_2 + 2) % ${#siswa_9d[@]}))]> " tmp
+	done
+	if [[ -z "$tmp" ]] 
+	then
+		siswa_renungan_2="$(((last_renungan_2 + 2) % ${#siswa_9d[@]}))"
+	else
+		siswa_renungan_2="$tmp"
+	fi
+
+
+	if [[ -t 0 ]]
+	then
+		echo -e "\nDoa pulang" > /dev/stderr
+		echo "Terakhir: ${siswa_9d[$last_doa_pulang]} (no. $last_doa_pulang)" > /dev/stderr
+
+		echo -e "${STYLE_BOLD}5 siswa dalam range doa:${STYLE_RESET}" > /dev/stderr
+
+		for i in $(seq $((last_doa_pulang - 2)) $((last_doa_pulang + 2)))
+		do
+			if [[ $i -eq $last_doa_pulang ]]
+			then
+				echo -e "\e[0;33m ${STYLE_BOLD}${i}) ${siswa_9d[$i]}${STYLE_RESET}" > /dev/stderr
+			else
+				echo " $((i % ${#siswa_9d[@]}))) ${siswa_9d[$((i % ${#siswa_9d[@]}))]}" > /dev/stderr
+			fi
+		done
+	fi
+
+	tmp="boo"
+	until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
+	do
+		read -p "→ Doa pulang: [$(((last_doa_pulang - 1) % ${#siswa_9d[@]}))] > " tmp
+	done
+	if [[ -z "$tmp" ]]
+	then
+		siswa_doa_pulang="$(((last_doa_pulang - 1) % ${#siswa_9d[@]}))"
+	else
+		siswa_doa_pulang="$tmp"
+	fi
+
+
+	echo "$(date '+%-m%d%Y')"
+	echo "$timestamp"
+	if [[ $(date '+%-m%d%Y') -gt $timestamp ]]
+	then
+		if [ -t 0 ]
+		then
+			echo -en "→ \e[0;31mSimpan data? [y/n]> $STYLE_RESET"
+			read tmp
+			[[ "$tmp" == "y" ]] && save_data
+		else
+			echo -e "\e[0;31m→ Saved data.$STYLE_RESET"
+			save_data
+		fi
+	fi
+fi
+
+echo -e "------------------------------\n" > /dev/stderr
+echo -e "🗓️ *$hari, $tanggal*"
+
+[[ -n "$baju_tmp" ]] && baju="$baju_tmp"
+[[ -z "$j_masuk" ]] && j_masuk="06:45"
+
+[[ -z "$j_pulang" ]] && j_pulang="14:35"
+
+# Pas udah ada eskur, add the code
+# to change the jam pulang
+
+#if [[ "`date +%A`" == "Rabu
+
+echo
+echo -e "🕡 Masuk pk. $j_masuk - $j_pulang $eskur"
+echo -e "👕 Memakai $baju"
+echo
+
+
+mapels
+
+
+if [[ -n "${pr}" ]]
+then
+	echo
+
+	echo "📔 *PR* (https://gg.gg/pr-tugas-9d-2023)"
+	for (( i = 0; i < ${#pr[@]}; i++ ))
+	do
+		[[ "${pr_tenggat[$i]}" == "null" ]] && echo "$((i+1))) *${pr_mapel[$i]}*: ${pr[$i]}" || echo "$((i+1))) *${pr_mapel[$i]}*: ${pr[$i]} *(🗓️ tenggat ${pr_tenggat[$i]})*"
+	done
+fi
+
+if [[ -n "$penilaian" ]]
+then
+	echo
+
+	echo "📄 *Penilaian*"
+	for (( i = 0; i < ${#penilaian[@]}; i++ ))
+	do
+		[[ "${penilaian_materi[$i]}" == null ]] && echo "$((i+1))) *${penilaian[$i]}*" || echo "$((i+1))) *${penilaian[$i]}*: ${penilaian_materi[$i]}"
+	done
+fi
+
+if  [[ -n "${catatan}" ]] || [[ "Senin|Selasa|Rabu|Jumat" =~ "$hari" ]]
+then
+
+	echo
+
+	echo "🖊️ *Catatan*"
+	case "$hari" in
+		Senin)
+			echo "• Membawa Alkitab (apabila perlu dikumpul di lemari)"
+			;;
+		Selasa)
+			echo "• Ada R&R."
+			;;
+		Jumat)
+			echo "• Membawa pulang Alkitab (apabila ada di lemari)"
+			echo "• Ada R&R (buku fisik)."
+			;;
+		Rabu)
+			[[ "$sport_time" == "n" ]] && echo "• *Tidak* ada sport time." || echo "• Ada sport time." 
+			;;
+	esac
+	for (( i = 0; i < ${#catatan[@]}; i++ ))
+	do
+		echo "$((i+1))) ${catatan[$i]}"
+	done
+	echo
+fi
+
+# also has fake arrays. BASH CMON SUPPORT 2 DIMENSIONAL ARRAYS
+declare -A data_piket=(
+["Senin"]='(13 9 2 1 3 4)'
+["Selasa"]='(22 30 6 7 8 10)'
+["Rabu"]='(5 11 14 12 15 16)'
+["Kamis"]='(23 17 19 20 21 24)'
+["Jumat"]='(18 25 26 27 28 29)'
+)
+
+echo "📱 *Piket Menjaga Handphone*"
+eval "piket_terakhir=(\${${hari@L}_last_piket[@]})"
+
+piket_1=$(((${piket_terakhir[0]} + 2 ) % 6))
+piket_2=$(((${piket_terakhir[1]} + 2 ) % 6))
+eval "data_piket_hari_ini=${data_piket[${hari}]}"
+siswa_piket_1=${data_piket_hari_ini[$piket_1]}
+siswa_piket_2=${data_piket_hari_ini[$piket_2]}
+eval "${hari@L}_last_piket=($siswa_piket_1 $siswa_piket_2)"
+
+echo "• ${siswa_9d[$siswa_piket_1]}"
+echo "• ${siswa_9d[$siswa_piket_2]}"
+
+
+echo
+echo "• Renungan pagi: *${siswa_9d[$siswa_renungan_1]}* dan *${siswa_9d[$siswa_renungan_2]}*"
+echo "• Doa pulang: *${siswa_9d[$siswa_doa_pulang]}*"
+
+sep
+echo "*🗒 Jadwal PH dan Kegiatan*: https://gg.gg/9d-jadwalkeg-2023"
+
+if "$HOME/Documents/School/siswa_db/tanggal-lahir-9d.sh" &> /dev/null
+then
+	sep
+	"$HOME/Documents/School/siswa_db/tanggal-lahir-9d.sh"
+fi
+
+if "$HOME/Documents/School/siswa_db/tanggal-lahir-9d.sh" tom &> /dev/null
+then
+	sep
+	"$HOME/Documents/School/siswa_db/tanggal-lahir-9d.sh"
+fi
+
