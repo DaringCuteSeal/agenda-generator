@@ -2,7 +2,7 @@
 
 export LC_ALL="id_ID.UTF-8"
 
-STYLE_BOLD="\e[1m;"
+STYLE_BOLD="\e[1;m"
 STYLE_RESET="\e[0;m"
 
 LAST_PATH="$HOME/Documents/School/Stuff/agenda/last"
