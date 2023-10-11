@@ -406,7 +406,7 @@ then
 	if [[ -z "$tmp" ]]
 	then
 
-		siswa_doa_pulang="$(((last_doa_pulang - 1) % ${#siswa_9d[@]}))"
+		siswa_doa_pulang="$(((last_doa_pulang + 29) % (${#siswa_9d[@]} + 1)))"
 	else
 		siswa_doa_pulang="$tmp"
 	fi
