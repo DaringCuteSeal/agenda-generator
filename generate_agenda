@@ -347,7 +347,7 @@ then
 		for i in $(seq $((last_renungan_1 - 3)) $((last_renungan_2 + 3)) | grep -vx 0)
 		do
 			no=$((($i + 31) % (${#siswa_9d[@]})+1))
-			if [[ $i -eq $last_renungan_1 ]] || [[ $i == "$last_renungan_2" ]]
+			if [[ $no -eq $last_renungan_1 ]] || [[ $no == "$last_renungan_2" ]]
 			then
 				echo -e "\e[1;33m $no) ${siswa_9d[$no]}${STYLE_RESET}" > /dev/stderr
 			else
@@ -391,7 +391,7 @@ then
 		for i in $(seq $((last_doa_pulang - 2)) $((last_doa_pulang + 2)) | grep -vx 0)
 		do
 			no=$(((i + 31) % (${#siswa_9d[@]} + 1)))
-			if [[ $i -eq $last_doa_pulang ]]
+			if [[ $no -eq $last_doa_pulang ]]
 			then
 				echo -e "\e[1;33m $no) ${siswa_9d[$no]}${STYLE_RESET}" > /dev/stderr
 			else
@@ -535,7 +535,7 @@ esac
 
 echo
 echo "• Renungan pagi: *${siswa_9d[$siswa_renungan_1]}* dan *${siswa_9d[$siswa_renungan_2]}*"
-echo "• Doa pulang: *${siswa_9d[$siswa_doa_pulang]}*"
+[[ -n "$siswa_doa_pulang" ]] && echo "• Doa pulang: *${siswa_9d[$siswa_doa_pulang]}*"
 
 sep
 echo "*🗒 Jadwal PH dan Kegiatan*: https://gg.gg/9d-jadwalkeg-2023"
