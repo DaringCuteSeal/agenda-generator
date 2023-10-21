@@ -124,7 +124,7 @@ jumat_last_piket=(${jumat_last_piket[@]})
 EOF
 }
 
-source "$HOME/Documents/School/siswa_db/siswa_9d.sh"
+source "$HOME/Documents/School/siswa_db/siswa_9d-akrab.sh"
 source "$LAST_PATH" || echo "[i] Gagal menyumberkan informasi terakhir!" > /dev/stderr
 
 case "$hari" in
@@ -423,7 +423,7 @@ then
 	then
 		if [ -t 0 ]
 		then
-			echo -en "→ \e[0;31mSimpan data? [y/n]> $STYLE_RESET"
+			echo -en "→ \e[0;31mSimpan data? [y/n]> $STYLE_RESET" > /dev/stderr
 			read tmp
 			[[ "$tmp" == "y" ]] && save_data
 		else
