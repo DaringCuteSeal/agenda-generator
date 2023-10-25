@@ -243,195 +243,208 @@ then
 fi
 
 
-if [[ ! "$1" == "preview" ]]
-then
-	read -p "→ Jam masuk? [06:45] > " j_masuk
-	read -p "→ Jam pulang? [$j_pulang_tmp] > " j_pulang
-	if [[ -z "$j_pulang" ]] && [[ -n "$j_pulang_pre" ]]
-	then
-		j_pulang="$j_pulang_pre"
-	fi
-	read -p "→ Seragam? [${baju//\*}] > " baju_tmp
+case "$1" in
+	utils)
+		case "$2" in
+			query)
+				echo "${kode[$3]}"
+				exit
+				;;
+			next-hint)
+				hint_next_mapel "$3"
+				exit
+				;;
+		esac
+		;;
+	*)
+		read -p "→ Jam masuk? [06:45] > " j_masuk
+		read -p "→ Jam pulang? [$j_pulang_tmp] > " j_pulang
+		if [[ -z "$j_pulang" ]] && [[ -n "$j_pulang_pre" ]]
+		then
+			j_pulang="$j_pulang_pre"
+		fi
+		read -p "→ Seragam? [${baju//\*}] > " baju_tmp
 
-	read -e -p "→ Mapel custom? " -a mapels_custom
+		read -e -p "→ Mapel custom? " -a mapels_custom
 
-	read -p "→ PR [y/n] > " tmp
-	if [[ "$tmp" == "y" ]]
-	then
-		n=1
-		echo "$n)" > /dev/stderr
-		read -e -p "Mapel: " input_pr_mapel
-		read -e -p "Tugas: " input_pr_tugas
-		hint_next_mapel "$input_pr_mapel"
-		read -e -p "Tenggat: " input_pr_tenggat
-
-		[[ -n "$input_pr_mapel" ]] && pr_mapel=("$input_pr_mapel")
-		[[ -n "$input_pr_tugas" ]] && pr=("$input_pr_tugas")
-		[[ -n "$input_pr_tenggat" ]] && pr_tenggat=("$input_pr_tenggat") || pr_tenggat=("null")
-
-		(( n++ ))
-
-		while [[ -n "$input_pr_mapel" ]] || [[ -n "$input_pr_tugas" ]]
-		do
-			echo > /dev/stderr
-
+		read -p "→ PR [y/n] > " tmp
+		if [[ "$tmp" == "y" ]]
+		then
+			n=1
 			echo "$n)" > /dev/stderr
 			read -e -p "Mapel: " input_pr_mapel
-			[[ -z "$input_pr_mapel" ]] && break
 			read -e -p "Tugas: " input_pr_tugas
 			hint_next_mapel "$input_pr_mapel"
 			read -e -p "Tenggat: " input_pr_tenggat
 
-
-			[[ -n "$input_pr_mapel" ]] && pr_mapel+=("$input_pr_mapel")
-			[[ -n "$input_pr_tugas" ]] && pr+=("$input_pr_tugas")
-			[[ -n "$input_pr_tenggat" ]] && pr_tenggat+=("$input_pr_tenggat") || pr_tenggat+=("null")
+			[[ -n "$input_pr_mapel" ]] && pr_mapel=("$input_pr_mapel")
+			[[ -n "$input_pr_tugas" ]] && pr=("$input_pr_tugas")
+			[[ -n "$input_pr_tenggat" ]] && pr_tenggat=("$input_pr_tenggat") || pr_tenggat=("null")
 
 			(( n++ ))
-		done
-	fi
+
+			while [[ -n "$input_pr_mapel" ]] || [[ -n "$input_pr_tugas" ]]
+			do
+				echo > /dev/stderr
+
+				echo "$n)" > /dev/stderr
+				read -e -p "Mapel: " input_pr_mapel
+				[[ -z "$input_pr_mapel" ]] && break
+				read -e -p "Tugas: " input_pr_tugas
+				hint_next_mapel "$input_pr_mapel"
+				read -e -p "Tenggat: " input_pr_tenggat
 
 
-	
-	read -p "→ Penilaian [y/n] > " tmp
-	if [[ "$tmp" == "y" ]]
-	then
-		n=1
-		echo "$n)" > /dev/stderr
-		read -e -p "Penilaian: " input_penilaian
-		read -e -p "Materi: " input_penilaian_materi
+				[[ -n "$input_pr_mapel" ]] && pr_mapel+=("$input_pr_mapel")
+				[[ -n "$input_pr_tugas" ]] && pr+=("$input_pr_tugas")
+				[[ -n "$input_pr_tenggat" ]] && pr_tenggat+=("$input_pr_tenggat") || pr_tenggat+=("null")
 
-		[[ -n "$input_penilaian" ]] && penilaian=("$input_penilaian")
-		[[ -n "$input_penilaian_materi" ]] && penilaian_materi=("$input_penilaian_materi") || penilaian_materi=("null")
+				(( n++ ))
+			done
+		fi
 
-		(( n++ ))
 
-		while [[ -n "$input_penilaian" ]]
-		do
-			echo > /dev/stderr
-
+		
+		read -p "→ Penilaian [y/n] > " tmp
+		if [[ "$tmp" == "y" ]]
+		then
+			n=1
 			echo "$n)" > /dev/stderr
 			read -e -p "Penilaian: " input_penilaian
-			[[ -z "$input_penilaian" ]] && break
 			read -e -p "Materi: " input_penilaian_materi
 
-			[[ -n "$input_penilaian" ]] && penilaian+=("$input_penilaian")
-			[[ -n "$input_penilaian_materi" ]] && penilaian_materi+=("$input_penilaian_materi") || penilaian_materi+=("null")
+			[[ -n "$input_penilaian" ]] && penilaian=("$input_penilaian")
+			[[ -n "$input_penilaian_materi" ]] && penilaian_materi=("$input_penilaian_materi") || penilaian_materi=("null")
 
 			(( n++ ))
-		done
-	fi
 
-	read -p "→ Catatan? [y/n] > " tmp
-	if [[ "$tmp" == "y" ]]
-	then
-		n=1
-		read -e -p "$n) " input_catatan
-		[[ -n "$input_catatan" ]] && catatan=("$input_catatan")
-		(( n++ ))
+			while [[ -n "$input_penilaian" ]]
+			do
+				echo > /dev/stderr
 
-		while [[ -n "$input_catatan" ]]
-		do
+				echo "$n)" > /dev/stderr
+				read -e -p "Penilaian: " input_penilaian
+				[[ -z "$input_penilaian" ]] && break
+				read -e -p "Materi: " input_penilaian_materi
+
+				[[ -n "$input_penilaian" ]] && penilaian+=("$input_penilaian")
+				[[ -n "$input_penilaian_materi" ]] && penilaian_materi+=("$input_penilaian_materi") || penilaian_materi+=("null")
+
+				(( n++ ))
+			done
+		fi
+
+		read -p "→ Catatan? [y/n] > " tmp
+		if [[ "$tmp" == "y" ]]
+		then
+			n=1
 			read -e -p "$n) " input_catatan
-			[[ -n "$input_catatan" ]] && catatan+=("$input_catatan")
+			[[ -n "$input_catatan" ]] && catatan=("$input_catatan")
 			(( n++ ))
-		done
-	fi
 
-	if [[ -t 0 ]] # only print these when stdin is open
-	then
-		echo -e " \nRenungan Pagi" > /dev/stderr
-		echo "Terakhir: ${siswa_9d[$last_renungan_1]} (no. $last_renungan_1), ${siswa_9d[$last_renungan_2]} (no. $last_renungan_2)" > /dev/stderr
-		echo -e "${STYLE_BOLD}8 siswa dalam range renungan:${STYLE_RESET}" > /dev/stderr
+			while [[ -n "$input_catatan" ]]
+			do
+				read -e -p "$n) " input_catatan
+				[[ -n "$input_catatan" ]] && catatan+=("$input_catatan")
+				(( n++ ))
+			done
+		fi
 
-		for i in $(seq $((last_renungan_1 - 3)) $((last_renungan_2 + 3)) | grep -vx 0)
-		do
-			no=$((($i + 31) % (${#siswa_9d[@]})+1))
-			if [[ $no -eq $last_renungan_1 ]] || [[ $no == "$last_renungan_2" ]]
-			then
-				echo -e "\e[1;33m $no) ${siswa_9d[$no]}${STYLE_RESET}" > /dev/stderr
-			else
-				echo " $no) ${siswa_9d[$no]}" > /dev/stderr
-			fi
-		done
-	fi
+		if [[ -t 0 ]] # only print these when stdin is open
+		then
+			echo -e " \nRenungan Pagi" > /dev/stderr
+			echo "Terakhir: ${siswa_9d[$last_renungan_1]} (no. $last_renungan_1), ${siswa_9d[$last_renungan_2]} (no. $last_renungan_2)" > /dev/stderr
+			echo -e "${STYLE_BOLD}8 siswa dalam range renungan:${STYLE_RESET}" > /dev/stderr
 
-	tmp="boo"
-	until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
-	do
-		read -p "→ Siswa 1: [$(((last_renungan_1 + 2) % ${#siswa_9d[@]}))]> " tmp
-	done
-	if [[ -z "$tmp" ]] 
-	then
-		siswa_renungan_1="$(((last_renungan_1 + 2) % ${#siswa_9d[@]}))"
-	else
-		siswa_renungan_1="$tmp"
-	fi
+			for i in $(seq $((last_renungan_1 - 3)) $((last_renungan_2 + 3)) | grep -vx 0)
+			do
+				no=$((($i + 31) % (${#siswa_9d[@]})+1))
+				if [[ $no -eq $last_renungan_1 ]] || [[ $no == "$last_renungan_2" ]]
+				then
+					echo -e "\e[1;33m $no) ${siswa_9d[$no]}${STYLE_RESET}" > /dev/stderr
+				else
+					echo " $no) ${siswa_9d[$no]}" > /dev/stderr
+				fi
+			done
+		fi
 
-	tmp=boo
-	until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
-	do
-		read -p "→ Siswa 2: [$(((last_renungan_2 + 2) % ${#siswa_9d[@]}))]> " tmp
-	done
-	if [[ -z "$tmp" ]] 
-	then
-		siswa_renungan_2="$(((last_renungan_2 + 2) % ${#siswa_9d[@]}))"
-	else
-		siswa_renungan_2="$tmp"
-	fi
-
-
-	if [[ -t 0 ]] 
-	then
-		echo -e "\nDoa pulang" > /dev/stderr
-		echo "Terakhir: ${siswa_9d[$last_doa_pulang]} (no. $last_doa_pulang)" > /dev/stderr
-
-		echo -e "${STYLE_BOLD}5 siswa dalam range doa:${STYLE_RESET}" > /dev/stderr
-
-		for i in $(seq $((last_doa_pulang - 2)) $((last_doa_pulang + 2)) | grep -vx 0)
-		do
-			no=$(((i + 31) % (${#siswa_9d[@]} + 1)))
-			if [[ $no -eq $last_doa_pulang ]]
-			then
-				echo -e "\e[1;33m $no) ${siswa_9d[$no]}${STYLE_RESET}" > /dev/stderr
-			else
-				echo " $no) ${siswa_9d[$no]}" > /dev/stderr
-			fi
-		done
-	fi
-
-	if [[ "$hari" != "Rabu" ]]
-	then
 		tmp="boo"
 		until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
 		do
-			read -p "→ Doa pulang: [$(((last_doa_pulang + 30) % (${#siswa_9d[@]} + 1)))] > " tmp
+			read -p "→ Siswa 1: [$(((last_renungan_1 + 2) % ${#siswa_9d[@]}))]> " tmp
 		done
-		if [[ -z "$tmp" ]]
+		if [[ -z "$tmp" ]] 
 		then
-
-			siswa_doa_pulang="$(((last_doa_pulang + 30) % (${#siswa_9d[@]} + 1)))"
+			siswa_renungan_1="$(((last_renungan_1 + 2) % ${#siswa_9d[@]}))"
 		else
-			siswa_doa_pulang="$tmp"
+			siswa_renungan_1="$tmp"
 		fi
-	else
-		siswa_doa_pulang=""
-	fi
 
-
-	if [[ $(date '+%-m%d%Y') -gt $timestamp ]]
-	then
-		if [ -t 0 ]
+		tmp=boo
+		until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
+		do
+			read -p "→ Siswa 2: [$(((last_renungan_2 + 2) % ${#siswa_9d[@]}))]> " tmp
+		done
+		if [[ -z "$tmp" ]] 
 		then
-			echo -en "→ \e[0;31mSimpan data? [y/n]> $STYLE_RESET" > /dev/stderr
-			read tmp
-			[[ "$tmp" == "y" ]] && save_data
+			siswa_renungan_2="$(((last_renungan_2 + 2) % ${#siswa_9d[@]}))"
 		else
-			echo -e "\e[0;31m→ Saved data.$STYLE_RESET"
-			save_data
+			siswa_renungan_2="$tmp"
 		fi
-	fi
-fi
+
+
+		if [[ -t 0 ]] 
+		then
+			echo -e "\nDoa pulang" > /dev/stderr
+			echo "Terakhir: ${siswa_9d[$last_doa_pulang]} (no. $last_doa_pulang)" > /dev/stderr
+
+			echo -e "${STYLE_BOLD}5 siswa dalam range doa:${STYLE_RESET}" > /dev/stderr
+
+			for i in $(seq $((last_doa_pulang - 2)) $((last_doa_pulang + 2)) | grep -vx 0)
+			do
+				no=$(((i + 31) % (${#siswa_9d[@]} + 1)))
+				if [[ $no -eq $last_doa_pulang ]]
+				then
+					echo -e "\e[1;33m $no) ${siswa_9d[$no]}${STYLE_RESET}" > /dev/stderr
+				else
+					echo " $no) ${siswa_9d[$no]}" > /dev/stderr
+				fi
+			done
+		fi
+
+		if [[ "$hari" != "Rabu" ]]
+		then
+			tmp="boo"
+			until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
+			do
+				read -p "→ Doa pulang: [$(((last_doa_pulang + 30) % (${#siswa_9d[@]} + 1)))] > " tmp
+			done
+			if [[ -z "$tmp" ]]
+			then
+
+				siswa_doa_pulang="$(((last_doa_pulang + 30) % (${#siswa_9d[@]} + 1)))"
+			else
+				siswa_doa_pulang="$tmp"
+			fi
+		else
+			siswa_doa_pulang=""
+		fi
+
+
+		if [[ $(date '+%-m%d%Y') -gt $timestamp ]]
+		then
+			if [ -t 0 ]
+			then
+				echo -en "→ \e[0;31mSimpan data? [y/n]> $STYLE_RESET" > /dev/stderr
+				read tmp
+				[[ "$tmp" == "y" ]] && save_data
+			else
+				echo -e "\e[0;31m→ Saved data.$STYLE_RESET"
+				save_data
+			fi
+		fi
+	;;
+esac
 
 echo -e "------------------------------\n" > /dev/stderr
 echo -e "🗓️ *$hari, $tanggal*"
