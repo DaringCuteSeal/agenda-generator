@@ -5,6 +5,8 @@ export LC_ALL="id_ID.UTF-8"
 STYLE_BOLD="\e[1;m"
 STYLE_RESET="\e[0;m"
 
+FORMAT_BOLD="${FORMAT_BOLD:-*}"
+
 LAST_PATH="$HOME/Documents/School/Stuff/agenda/last"
 
 setdate=${DATE_OVERRIDE:-tomorrow}
@@ -14,7 +16,7 @@ hari="`date -d "$setdate" '+%A'`"
 j_pulang_tmp="14:35"
 
 mapels() {
-	echo "📚 *Mapel*"
+	echo "📚 ${FORMAT_BOLD}Mapel${FORMAT_BOLD}"
 
 	if [[ -n "$mapels_custom" ]]
 	then
@@ -53,7 +55,7 @@ sep(){
 		Des)
 			echo "❄️☃️❄️"
 			;;
-		*)
+		${FORMAT_BOLD})
 			echo "---"
 			;;
 	esac
@@ -109,7 +111,7 @@ hint_next_mapel(){
 
 save_data(){
 	# Save data
-	mv "$LAST_PATH" "${LAST_PATH%/*}/last.bak"
+	mv "$LAST_PATH" "${LAST_PATH%/${FORMAT_BOLD}}/last.bak"
 	cat > "$LAST_PATH"<< EOF
 timestamp="$(date '+%-m%d%Y')"
 last_renungan_1=${siswa_renungan_1:-$last_renungan_1}
@@ -158,29 +160,29 @@ esac
 
 case "$hari" in
 	Senin)
-		baju="*seragam putih kotak lengkap*, membawa *jas lab*"
+		baju="${FORMAT_BOLD}seragam putih kotak lengkap${FORMAT_BOLD}, membawa ${FORMAT_BOLD}jas lab${FORMAT_BOLD}"
 		;;
 	Selasa)
-		baju="*seragam putih kotak lengkap*"
+		baju="${FORMAT_BOLD}seragam putih kotak lengkap${FORMAT_BOLD}"
 		;;
 	Rabu)
 		if [[ "$sport_time" == "n" ]]
 		then
-			baju="*seragam Pramuka lengkap* dengan *kacu, ikat pinggang*; membawa topi Pramuka 🤠"
+			baju="${FORMAT_BOLD}seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu, ikat pinggang${FORMAT_BOLD}; membawa topi Pramuka 🤠"
 		else
-			baju="*baju olah raga atau kaos bebas* (ada sport time), *membawa seragam Pramuka lengkap* dengan *kacu* dan *ikat pinggang* dan *topi Pramuka* 🤠"
+			baju="${FORMAT_BOLD}baju olah raga atau kaos bebas${FORMAT_BOLD} (ada sport time), ${FORMAT_BOLD}membawa seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu${FORMAT_BOLD} dan ${FORMAT_BOLD}ikat pinggang${FORMAT_BOLD} dan ${FORMAT_BOLD}topi Pramuka${FORMAT_BOLD} 🤠"
 		fi
 	#	eskur="(ada eskur pramuka)"
 		;;
 	Kamis)
-		baju="*baju olahraga*, membawa *seragam putih kotak*."
+		baju="${FORMAT_BOLD}baju olahraga${FORMAT_BOLD}, membawa ${FORMAT_BOLD}seragam putih kotak${FORMAT_BOLD}."
 		;;
 	Jumat)
-		baju="*baju batik* dengan *bawahan biru*"
+		baju="${FORMAT_BOLD}baju batik${FORMAT_BOLD} dengan ${FORMAT_BOLD}bawahan biru${FORMAT_BOLD}"
 		;;
 
 		# yo wes PJJ lagi
-		#baju="*baju olahraga*"
+		#baju="${FORMAT_BOLD}baju olahraga${FORMAT_BOLD}"
 esac
 
 
@@ -234,6 +236,8 @@ declare -A mapel=(
 ["Rabu"]='(SB 25 4 2 40)'
 ["Kamis"]='(28 14 SB 8 39 25 2)'
 ["Jumat"]='(10 4 14 22 25 8)'
+["Sabtu"]='()'
+["Minggu"]='()'
 )
 
 if [[ "$MAPELS_ONLY" -eq 1 ]]
@@ -252,7 +256,6 @@ case "$1" in
 				;;
 			next-hint)
 				hint_next_mapel "$3"
-				exit
 				;;
 		esac
 		;;
@@ -263,7 +266,7 @@ case "$1" in
 		then
 			j_pulang="$j_pulang_pre"
 		fi
-		read -p "→ Seragam? [${baju//\*}] > " baju_tmp
+		read -p "→ Seragam? [${baju//\${FORMAT_BOLD}}] > " baju_tmp
 
 		read -e -p "→ Mapel custom? " -a mapels_custom
 
@@ -447,7 +450,7 @@ case "$1" in
 esac
 
 echo -e "------------------------------\n" > /dev/stderr
-echo -e "🗓️ *$hari, $tanggal*"
+echo -e "🗓️ ${FORMAT_BOLD}$hari, $tanggal${FORMAT_BOLD}"
 
 [[ -n "$baju_tmp" ]] && baju="$baju_tmp"
 [[ -z "$j_masuk" ]] && j_masuk="06:45"
@@ -472,10 +475,10 @@ if [[ -n "${pr}" ]]
 then
 	echo
 
-	echo "📔 *PR* (https://gg.gg/pr-tugas-9d-2023)"
+	echo "📔 ${FORMAT_BOLD}PR${FORMAT_BOLD} (https://gg.gg/pr-tugas-9d-2023)"
 	for (( i = 0; i < ${#pr[@]}; i++ ))
 	do
-		[[ "${pr_tenggat[$i]}" == "null" ]] && echo "$((i+1))) *${pr_mapel[$i]}*: ${pr[$i]}" || echo "$((i+1))) *${pr_mapel[$i]}*: ${pr[$i]} *(🗓️ tenggat ${pr_tenggat[$i]})*"
+		[[ "${pr_tenggat[$i]}" == "null" ]] && echo "$((i+1))) ${FORMAT_BOLD}${pr_mapel[$i]}${FORMAT_BOLD}: ${pr[$i]}" || echo "$((i+1))) ${FORMAT_BOLD}${pr_mapel[$i]}${FORMAT_BOLD}: ${pr[$i]} ${FORMAT_BOLD}(🗓️ tenggat ${pr_tenggat[$i]})${FORMAT_BOLD}"
 	done
 fi
 
@@ -483,10 +486,10 @@ if [[ -n "$penilaian" ]]
 then
 	echo
 
-	echo "📄 *Penilaian*"
+	echo "📄 ${FORMAT_BOLD}Penilaian${FORMAT_BOLD}"
 	for (( i = 0; i < ${#penilaian[@]}; i++ ))
 	do
-		[[ "${penilaian_materi[$i]}" == null ]] && echo "$((i+1))) *${penilaian[$i]}*" || echo "$((i+1))) *${penilaian[$i]}*: ${penilaian_materi[$i]}"
+		[[ "${penilaian_materi[$i]}" == null ]] && echo "$((i+1))) ${FORMAT_BOLD}${penilaian[$i]}${FORMAT_BOLD}" || echo "$((i+1))) ${FORMAT_BOLD}${penilaian[$i]}${FORMAT_BOLD}: ${penilaian_materi[$i]}"
 	done
 fi
 
@@ -495,7 +498,7 @@ then
 
 	echo
 
-	echo "🖊️ *Catatan*"
+	echo "🖊️ ${FORMAT_BOLD}Catatan${FORMAT_BOLD}"
 	case "$hari" in
 		Senin)
 			echo "• Membawa Alkitab (apabila perlu dikumpul di lemari)"
@@ -508,7 +511,7 @@ then
 			echo "• Ada R&R (buku fisik)."
 			;;
 		Rabu)
-			[[ "$sport_time" == "n" ]] && echo "• *Tidak* ada sport time." || echo "• Ada sport time." 
+			[[ "$sport_time" == "n" ]] && echo "• ${FORMAT_BOLD}Tidak${FORMAT_BOLD} ada sport time." || echo "• Ada sport time." 
 			;;
 	esac
 	for (( i = 0; i < ${#catatan[@]}; i++ ))
@@ -529,8 +532,8 @@ declare -A data_piket=(
 case "$hari" in
 	Selasa)
 		;;
-	*)
-		echo -e "\n📱 *Piket Menjaga Handphone*"
+	${FORMAT_BOLD})
+		echo -e "\n📱 ${FORMAT_BOLD}Piket Menjaga Handphone${FORMAT_BOLD}"
 		eval "piket_terakhir=(\${${hari@L}_last_piket[@]})"
 
 		piket_1=$(((${piket_terakhir[0]} + 2 ) % 6))
@@ -547,11 +550,11 @@ esac
 
 
 echo
-echo "• Renungan pagi: *${siswa_9d[$siswa_renungan_1]}* dan *${siswa_9d[$siswa_renungan_2]}*"
-[[ -n "$siswa_doa_pulang" ]] && echo "• Doa pulang: *${siswa_9d[$siswa_doa_pulang]}*"
+echo "• Renungan pagi: ${FORMAT_BOLD}${siswa_9d[$siswa_renungan_1]}${FORMAT_BOLD} dan ${FORMAT_BOLD}${siswa_9d[$siswa_renungan_2]}${FORMAT_BOLD}"
+[[ -n "$siswa_doa_pulang" ]] && echo "• Doa pulang: ${FORMAT_BOLD}${siswa_9d[$siswa_doa_pulang]}${FORMAT_BOLD}"
 
 sep
-echo "*🗒 Jadwal PH dan Kegiatan*: https://gg.gg/9d-jadwalkeg-2023"
+echo "${FORMAT_BOLD}🗒 Jadwal PH dan Kegiatan${FORMAT_BOLD}: https://gg.gg/9d-jadwalkeg-2023"
 
 if "$HOME/Documents/School/siswa_db/tanggal-lahir-9d.sh" &> /dev/null
 then
@@ -564,3 +567,4 @@ then
 	sep
 	"$HOME/Documents/School/siswa_db/tanggal-lahir-9d.sh"
 fi
+
