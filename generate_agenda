@@ -140,7 +140,7 @@ case "$hari" in
 		;;
 	Rabu)
 
-		[[ $MAPELS_ONLY -ne 1 ]] && read -p "→ Sport time? [y/n] > " tmp
+		[[ $MAPELS_ONLY -ne 1 ]] && [[ "$1" != "preview" ]] && read -p "→ Sport time? [y/n] > " tmp
 		if [[ "$tmp" == "n" ]]
 		then
 			sport_time=n
@@ -258,6 +258,9 @@ case "$1" in
 				hint_next_mapel "$3"
 				;;
 		esac
+		;;
+	preview)
+		echo 
 		;;
 	*)
 		read -p "→ Jam masuk? [06:45] > " j_masuk

@@ -16,7 +16,7 @@ Cool everyday agenda generator for shell script nerd secretaries (primarily for 
 🌟 Smart stderr-only prompting for piping
 
 
-Example (translateed):
+Example (translated):
 ```
 🗓️ *Monday, 04 September 2023*
 
@@ -59,9 +59,9 @@ Example (translateed):
 - Only print out the subjects for a day: `MAPELS_ONLY=1 generate_agenda`
 - Don't prompt: `generate_agenda preview` or `generate_agenda <<< ""`
 
-(I really want to make an Android/iOS version for this app for future secretaries 😁)
 
-# Warning
+# Notice & Info
 - If you can read these stuff but found the script to be very quirky, *you don't need this script*.
 - Many hardcoded paths, names, and data (this is for my personal use)—can still be changed by editing the script directly. Data examples can be found under [data/](data/)
 - I don't care about the cleanliness of this script. If it works, it works.
+- I really want to make an Android/iOS version for this app for future secretaries 😁
