@@ -129,27 +129,27 @@ EOF
 source "$HOME/Documents/School/siswa_db/siswa_9d-akrab.sh"
 source "$LAST_PATH" || echo "[i] Gagal menyumberkan informasi terakhir!" > /dev/stderr
 
-case "$hari" in
-	Senin)
-		;;
-	Selasa)
-		eskur="(bagi yang eskur pulang pk. 16:15)"
-		;;
-	Jumat)
-		eskur="(bagi yang eskur pulang pk. 16:15)"
-		;;
-	Rabu)
+# case "$hari" in
+# 	Senin)
+# 		;;
+# 	Selasa)
+# 		eskur="(bagi yang eskur pulang pk. 16:15)"
+# 		;;
+# 	Jumat)
+# 		eskur="(bagi yang eskur pulang pk. 16:15)"
+# 		;;
+# 	Rabu)
 
-		[[ $MAPELS_ONLY -ne 1 ]] && [[ "$1" != "preview" ]] && read -p "→ Sport time? [y/n] > " tmp
-		if [[ "$tmp" == "n" ]]
-		then
-			sport_time=n
-		fi
-		j_pulang_pre="16:15"
-		j_pulang_tmp="16:15"
-		eskur="(ada eskur Pramuka)"
-		;;
-esac
+# 		[[ $MAPELS_ONLY -ne 1 ]] && [[ "$1" != "preview" ]] && read -p "→ Sport time? [y/n] > " tmp
+# 		if [[ "$tmp" == "n" ]]
+# 		then
+# 			sport_time=n
+# 		fi
+# 		j_pulang_pre="16:15"
+# 		j_pulang_tmp="16:15"
+# 		eskur="(ada eskur Pramuka)"
+# 		;;
+# esac
 
 case "$hari" in
 	Sabtu|Minggu)
