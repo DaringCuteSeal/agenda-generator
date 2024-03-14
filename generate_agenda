@@ -15,6 +15,35 @@ hari="`date -d "$setdate" '+%A'`"
 
 j_pulang_tmp="14:35"
 
+notion_secret="secret_g4o4Mj2hARo8vMSy4VLExEDE3agSqS5urMb7iFR2xLz"
+notion_db_id="b0c13121626b4fe589655eae8e45c180"
+
+notion_integration_retrive_tasks(){
+	curl -X POST "https://api.notion.com/v1/databases/$notion_db_id/query" \
+		-H "Authorization: Bearer '\"$notion_secret\"'" \
+		-H 'Notion-Version: 2022-06-28' \
+		-H "Content-Type: application/json" \
+		--data '{
+			"filter": {
+			"property": "Status",
+			"status": {
+			"equals": "Dalam pengerjaan"
+		}
+	} ,
+
+	"sorts": [
+	{
+		"property": "Status",
+		"direction": "ascending"
+	},
+	{
+		"property": "Tenggat",
+		"direction": "ascending"
+	}
+	]
+}'
+
+}
 mapels() {
 	echo "📚 ${FORMAT_BOLD}Mapel${FORMAT_BOLD}"
 
@@ -73,6 +102,23 @@ reverse_lookup_kode(){
 
 
 }
+
+determine_rel_date(){
+
+	day_rel_no="$1"
+	if [[ "$day_rel_no" -eq 1 ]]
+	then
+		echo "tomorrow"
+	else
+		if [[ "$(date -d "$day_rel_no days" +%u)" -lt "$(date +%u)" ]]
+		then
+			echo "next_week"
+		else
+			echo "this_week"
+		fi
+	fi
+}
+
 hint_next_mapel(){
 	[[ -n "$DATE_OVERRIDE" ]] && return #current limitation
 
@@ -90,17 +136,17 @@ hint_next_mapel(){
 			do
 				if [[ "$code" == "$code_day" ]]
 				then
-					if [[ "$day_rel_no" -eq 1 ]]
-					then
-						echo -e "\e[1;32mHint: mapel $1 yang berikutnya ada besok${STYLE_RESET}"
-					else
-						if [[ "$(date -d "$day_rel_no days" +%u)" -lt "$(date +%u)" ]]
-						then
+					case "$(determine_rel_date "$day_rel_no")" in
+						tomorrow)
+							echo -e "\e[1;32mHint: mapel $1 yang berikutnya ada besok${STYLE_RESET}"
+							;;
+						next_week)
 							echo -e "\e[1;32mHint: mapel $1 yang berikutnya ada pada hari $day_rel depan${STYLE_RESET}"
-						else
+							;;
+						this_week)
 							echo -e "\e[1;32mHint: mapel $1 yang berikutnya ada pada hari $day_rel${STYLE_RESET}"
-						fi
-					fi
+							;;
+					esac
 					return
 				fi
 			done
@@ -129,27 +175,27 @@ EOF
 source "$HOME/Documents/School/siswa_db/siswa_9d-akrab.sh"
 source "$LAST_PATH" || echo "[i] Gagal menyumberkan informasi terakhir!" > /dev/stderr
 
-# case "$hari" in
-# 	Senin)
-# 		;;
-# 	Selasa)
-# 		eskur="(bagi yang eskur pulang pk. 16:15)"
-# 		;;
-# 	Jumat)
-# 		eskur="(bagi yang eskur pulang pk. 16:15)"
-# 		;;
-# 	Rabu)
+case "$hari" in
+	# Senin)
+	# 	;;
+	# Selasa)
+	# 	eskur="(bagi yang eskur pulang pk. 16:15)"
+	# 	;;
+	# Jumat)
+	# 	eskur="(bagi yang eskur pulang pk. 16:15)"
+	# 	;;
+	Rabu)
 
-# 		[[ $MAPELS_ONLY -ne 1 ]] && [[ "$1" != "preview" ]] && read -p "→ Sport time? [y/n] > " tmp
-# 		if [[ "$tmp" == "n" ]]
-# 		then
-# 			sport_time=n
-# 		fi
-# 		j_pulang_pre="16:15"
-# 		j_pulang_tmp="16:15"
-# 		eskur="(ada eskur Pramuka)"
-# 		;;
-# esac
+		[[ $MAPELS_ONLY -ne 1 ]] && [[ "$1" != "preview" ]] && read -p "→ Sport time? [y/n] > " tmp
+		if [[ "$tmp" == "n" ]]
+		then
+			sport_time=n
+		fi
+		j_pulang_pre="16:15"
+		j_pulang_tmp="16:15"
+		eskur="(ada eskur Pramuka)"
+		;;
+esac
 
 case "$hari" in
 	Sabtu|Minggu)
@@ -168,9 +214,11 @@ case "$hari" in
 	Rabu)
 		if [[ "$sport_time" == "n" ]]
 		then
-			baju="${FORMAT_BOLD}seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu, ikat pinggang${FORMAT_BOLD}; membawa topi Pramuka 🤠"
+			# baju="${FORMAT_BOLD}seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu, ikat pinggang${FORMAT_BOLD}; membawa topi Pramuka 🤠"
+			baju="${FORMAT_BOLD}seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu, ikat pinggang${FORMAT_BOLD}"
 		else
-			baju="${FORMAT_BOLD}baju olah raga atau kaos bebas${FORMAT_BOLD} (ada sport time), ${FORMAT_BOLD}membawa seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu${FORMAT_BOLD} dan ${FORMAT_BOLD}ikat pinggang${FORMAT_BOLD} dan ${FORMAT_BOLD}topi Pramuka${FORMAT_BOLD} 🤠"
+			# baju="${FORMAT_BOLD}baju olah raga atau kaos bebas${FORMAT_BOLD} (ada sport time), ${FORMAT_BOLD}membawa seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu${FORMAT_BOLD} dan ${FORMAT_BOLD}ikat pinggang${FORMAT_BOLD} dan ${FORMAT_BOLD}topi Pramuka${FORMAT_BOLD} 🤠"
+			baju="${FORMAT_BOLD}baju olah raga atau kaos bebas${FORMAT_BOLD} (ada sport time), ${FORMAT_BOLD}membawa seragam Pramuka lengkap${FORMAT_BOLD} dengan ${FORMAT_BOLD}kacu${FORMAT_BOLD} dan ${FORMAT_BOLD}ikat pinggang${FORMAT_BOLD}"
 		fi
 	#	eskur="(ada eskur pramuka)"
 		;;
@@ -234,8 +282,8 @@ declare -A mapel=(
 ["Senin"]='(18 NAT 14 LABF LABB 22 8)'
 ["Selasa"]='(14 10 PRA 28 18)'
 ["Rabu"]='(SB 25 4 2 40)'
-["Kamis"]='(28 14 SB 8 39 25 2)'
-["Jumat"]='(10 4 14 22 25 8)'
+["Kamis"]='(28 10 SB 8 39 18 2)'
+["Jumat"]='(8 14 4 22 25 10)'
 ["Sabtu"]='()'
 ["Minggu"]='()'
 )
@@ -256,6 +304,7 @@ case "$1" in
 				;;
 			next-hint)
 				hint_next_mapel "$3"
+				exit
 				;;
 		esac
 		;;
@@ -276,6 +325,11 @@ case "$1" in
 		read -p "→ PR [y/n] > " tmp
 		if [[ "$tmp" == "y" ]]
 		then
+			read -p "→ Query Notion db? >" tmp
+			if [[ "$tmp" == "y" ]]
+			then
+				notion_integration_retrive_tasks
+			fi
 			n=1
 			echo "$n)" > /dev/stderr
 			read -e -p "Mapel: " input_pr_mapel
@@ -418,23 +472,23 @@ case "$1" in
 			done
 		fi
 
-		if [[ "$hari" != "Rabu" ]]
-		then
+		# if [[ "$hari" != "Rabu" ]]
+		# then
 			tmp="boo"
 			until isint_exclude_empty $tmp && [[ $tmp -le ${#siswa_9d[@]} ]]
 			do
-				read -p "→ Doa pulang: [$(((last_doa_pulang + 30) % (${#siswa_9d[@]} + 1)))] > " tmp
+				read -p "→ Doa pulang: [$(((last_doa_pulang + 30) % (${#siswa_9d[@]} - 1)))] > " tmp
 			done
 			if [[ -z "$tmp" ]]
 			then
 
-				siswa_doa_pulang="$(((last_doa_pulang + 30) % (${#siswa_9d[@]} + 1)))"
+				siswa_doa_pulang="$(((last_doa_pulang + 30) % (${#siswa_9d[@]} - 1)))"
 			else
 				siswa_doa_pulang="$tmp"
 			fi
-		else
-			siswa_doa_pulang=""
-		fi
+		# else
+			# siswa_doa_pulang=""
+		# fi
 
 
 		if [[ $(date '+%-m%d%Y') -gt $timestamp ]]
@@ -496,7 +550,7 @@ then
 	done
 fi
 
-if  [[ -n "${catatan}" ]] || [[ "Senin|Selasa|Rabu|Jumat" =~ "$hari" ]]
+if  [[ -n "${catatan}" ]] || [[ "Senin|Jumat" =~ "$hari" ]]
 then
 
 	echo
@@ -511,7 +565,7 @@ then
 			;;
 		Jumat)
 			echo "• Membawa pulang Alkitab (apabila ada di lemari)"
-			echo "• Ada R&R (buku fisik)."
+			# echo "• Ada R&R (buku fisik)."
 			;;
 		Rabu)
 			[[ "$sport_time" == "n" ]] && echo "• ${FORMAT_BOLD}Tidak${FORMAT_BOLD} ada sport time." || echo "• Ada sport time." 
@@ -528,14 +582,12 @@ declare -A data_piket=(
 ["Senin"]='(13 9 2 1 3 4)'
 ["Selasa"]='(22 30 6 7 8 10)'
 ["Rabu"]='(5 11 14 12 15 16)'
-["Kamis"]='(23 17 18 20 21 24)'
+["Kamis"]='(23 17 19 20 21 24)'
 ["Jumat"]='(18 25 26 27 28 29)'
 )
 
 case "$hari" in
-	Selasa)
-		;;
-	${FORMAT_BOLD})
+	*)
 		echo -e "\n📱 ${FORMAT_BOLD}Piket Menjaga Handphone${FORMAT_BOLD}"
 		eval "piket_terakhir=(\${${hari@L}_last_piket[@]})"
 
