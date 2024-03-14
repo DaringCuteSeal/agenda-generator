@@ -16,11 +16,12 @@ hari="`date -d "$setdate" '+%A'`"
 j_pulang_tmp="14:35"
 
 notion_secret="secret_g4o4Mj2hARo8vMSy4VLExEDE3agSqS5urMb7iFR2xLz"
-notion_db_id="b0c13121626b4fe589655eae8e45c180"
+notion_db_id="9ee5dd92b3a34f1082f9bd0a424e5e8c"
 
 notion_integration_retrive_tasks(){
-	curl -X POST "https://api.notion.com/v1/databases/$notion_db_id/query" \
-		-H "Authorization: Bearer '\"$notion_secret\"'" \
+	set -e
+	json_tasks=$(curl -X POST "https://api.notion.com/v1/databases/$notion_db_id/query" \
+		-H 'Authorization: Bearer '"$notion_secret"'' \
 		-H 'Notion-Version: 2022-06-28' \
 		-H "Content-Type: application/json" \
 		--data '{
@@ -41,7 +42,54 @@ notion_integration_retrive_tasks(){
 		"direction": "ascending"
 	}
 	]
-}'
+}')
+
+	tasks_count="$(jq '.results | length' <<< "$json_tasks" )"
+
+	for ((j = 0; j < $tasks_count; j++))
+	do
+		eval pr+=("$(jq ".results[$j].properties.Tugas.title[0].plain_text" <<< "$json_tasks")")
+		eval pr_mapel+=("$(jq ".results[$j].properties.Mapel.select.name" <<< "$json_tasks")")
+
+		eval notion_tenggat_tmp=$(jq ".results[$j].properties.Tenggat.date.start" <<< "$json_tasks")
+
+		if [[ $notion_tenggat_tmp == "null" ]]
+		then
+			pr_tenggat+=("null")
+			continue
+		else
+
+			tenggat_tmp_month=$(date -d $notion_tenggat_tmp +%-m)
+			tenggat_tmp_day=$(date -d $notion_tenggat_tmp +%-d)
+			tenggat_tmp_year=$(date -d $notion_tenggat_tmp +%Y)
+
+			# kalo minggu ini atau minggu depan, make the due human-readable...
+			if [[ $((tenggat_tmp_year - $(date +%Y))) -eq 0 ]] && [[ $((tenggat_tmp_month - $(date +%m))) -eq 0 ]] && [[ $((tenggat_tmp_day - $(date +%d))) -lt 8 ]] 
+			then
+				rel_day="$(determine_rel_date $((tenggat_tmp_day - $(date +%d))))"
+				case "$rel_day" in
+					tomorrow)
+						tmp_tenggat="besok"
+						;;
+					this_week)
+						tmp_tenggat="$(date -d "$notion_tenggat_tmp" +%A)"
+						;;
+					next_week)
+						tmp_tenggat="$(date -d "$notion_tenggat_tmp" +%A) depan"
+						;;
+				esac
+			else
+				tmp_tenggat="$(date -d "$notion_tenggat_tmp" '+%d %B' )"
+
+			fi
+
+
+			pr_tenggat+=("$tmp_tenggat")
+		fi
+	done
+
+	set +e
+	
 
 }
 mapels() {
@@ -110,7 +158,7 @@ determine_rel_date(){
 	then
 		echo "tomorrow"
 	else
-		if [[ "$(date -d "$day_rel_no days" +%u)" -lt "$(date +%u)" ]]
+		if [[ "$(date -d "$day_rel_no days" +%u)" -le "$(($(date +%u)))" ]]
 		then
 			echo "next_week"
 		else
@@ -325,42 +373,48 @@ case "$1" in
 		read -p "→ PR [y/n] > " tmp
 		if [[ "$tmp" == "y" ]]
 		then
-			read -p "→ Query Notion db? >" tmp
+			read -p "→ Query Notion db? > " tmp
 			if [[ "$tmp" == "y" ]]
 			then
 				notion_integration_retrive_tasks
 			fi
-			n=1
-			echo "$n)" > /dev/stderr
-			read -e -p "Mapel: " input_pr_mapel
-			read -e -p "Tugas: " input_pr_tugas
-			hint_next_mapel "$input_pr_mapel"
-			read -e -p "Tenggat: " input_pr_tenggat
 
-			[[ -n "$input_pr_mapel" ]] && pr_mapel=("$input_pr_mapel")
-			[[ -n "$input_pr_tugas" ]] && pr=("$input_pr_tugas")
-			[[ -n "$input_pr_tenggat" ]] && pr_tenggat=("$input_pr_tenggat") || pr_tenggat=("null")
+			read -p "→ Manually enter tasks? > " tmp
+			if [[ "$tmp" == "y" ]]
+			then
 
-			(( n++ ))
-
-			while [[ -n "$input_pr_mapel" ]] || [[ -n "$input_pr_tugas" ]]
-			do
-				echo > /dev/stderr
-
+				n=1
 				echo "$n)" > /dev/stderr
 				read -e -p "Mapel: " input_pr_mapel
-				[[ -z "$input_pr_mapel" ]] && break
 				read -e -p "Tugas: " input_pr_tugas
 				hint_next_mapel "$input_pr_mapel"
 				read -e -p "Tenggat: " input_pr_tenggat
 
-
-				[[ -n "$input_pr_mapel" ]] && pr_mapel+=("$input_pr_mapel")
-				[[ -n "$input_pr_tugas" ]] && pr+=("$input_pr_tugas")
-				[[ -n "$input_pr_tenggat" ]] && pr_tenggat+=("$input_pr_tenggat") || pr_tenggat+=("null")
+				[[ -n "$input_pr_mapel" ]] && pr_mapel=("$input_pr_mapel")
+				[[ -n "$input_pr_tugas" ]] && pr=("$input_pr_tugas")
+				[[ -n "$input_pr_tenggat" ]] && pr_tenggat=("$input_pr_tenggat") || pr_tenggat=("null")
 
 				(( n++ ))
-			done
+
+				while [[ -n "$input_pr_mapel" ]] || [[ -n "$input_pr_tugas" ]]
+				do
+					echo > /dev/stderr
+
+					echo "$n)" > /dev/stderr
+					read -e -p "Mapel: " input_pr_mapel
+					[[ -z "$input_pr_mapel" ]] && break
+					read -e -p "Tugas: " input_pr_tugas
+					hint_next_mapel "$input_pr_mapel"
+					read -e -p "Tenggat: " input_pr_tenggat
+
+
+					[[ -n "$input_pr_mapel" ]] && pr_mapel+=("$input_pr_mapel")
+					[[ -n "$input_pr_tugas" ]] && pr+=("$input_pr_tugas")
+					[[ -n "$input_pr_tenggat" ]] && pr_tenggat+=("$input_pr_tenggat") || pr_tenggat+=("null")
+
+					(( n++ ))
+				done
+			fi
 		fi
 
 
